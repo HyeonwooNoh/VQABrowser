@@ -1,0 +1,21 @@
+## temporary files for VQA Browser
+temporary/
+static/addimgs
+static/images
+
+## data
+data/MSCOCO/images
+## images
+*.png
+*.jpg
+
+## useless extensions
+*.pyc
+*.tar.gz
+*.dot
+*.svg
+*.zip
+*.json
+## swap files
+*.swp
+.~*

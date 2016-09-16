@@ -1,0 +1,87 @@
+.container {
+   width: 1080px;
+}
+.plotfig {
+   width: 100%; 
+}
+.inner-row {
+   padding-left: 20px;
+   padding-right: 20px;
+}
+.topjumbo {
+   padding-top: 20px;
+   padding-bottom: 10px;
+}
+.filebox {
+   padding-left: 20px;
+}
+.load-form {
+   margin-bottom: 5px;
+}
+.file-control {
+   height:30px;
+   background-color:#fff;
+}
+.loadbox {
+   padding-top:auto;
+   padding-bottom:auto;
+   height: 35px;
+}
+.download-link {
+   font-size: 20px;
+}
+.btn-line {
+   margin-bottom: 23px;
+}
+/* Result Visualization */
+.visimg {
+   width: 200px;
+   margin-top: 3px;
+   margin-bottom: 3px;
+}
+.addimg {
+   width: 200px;
+}
+.interpolation {
+}
+.nointerpolation {
+   image-rendering: pixelated;
+   image-rendering: -moz-crisp-edges;
+   -ms-interpolation-mode:nearest-neighbor;
+}
+.sqvisimg {
+   width: 200px;
+   height: 200px;
+   margin-top: 3px;
+   margin-bottom: 3px;
+}
+.sqaddimg {
+   height: 200px;
+}
+
+.td-label {
+   font-size: 17px;
+}
+.td-content {
+   font-size: 17px;
+}
+.ul-ans {
+   list-style-type: circle;
+}
+.li-ans {
+   font-size: 13px;
+   margin-bottom: 5px;
+}
+/* question occurence table */
+.occurence {
+   margin-left: auto;
+   margin-right: auto;
+   width: 800px;
+}
+.pagerlink:hover {
+   cursor:pointer;
+}
+.pathbox {
+   min-width: 950px;
+}
+

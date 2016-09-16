@@ -1,0 +1,484 @@
+ <!DOCTYPE html>
+<html lang="en-US">
+<head>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+<link rel="stylesheet" href="static/css/style.css"></link>
+
+<title>VQA Browser</title>
+</head>
+
+<body ng-app="browserApp" ng-controller="visualizeCtrl">
+<ul class="nav nav-tabs">
+   <li role="presentation" class="active"><a>VQA Browser</a></li>
+</ul>
+<div class="container">
+  <div class="jumbotron topjumbo">
+    <h1>VQA Browser</h1>
+    <div class="filebox">
+    <h4>
+      Visualization: 
+        {% if state.visable %}
+          <span class="glyphicon glyphicon-ok" style="color:#2a4"></span>
+        {% else %}
+          <span class="glyphicon glyphicon-remove" style="color:#e24"></span>
+        {% endif %}
+      &nbsp;&nbsp;
+      Evaluation: 
+        {% if state.evaluable %}
+          <span class="glyphicon glyphicon-ok" style="color:#2a4"></span>
+        {% else %}
+          <span class="glyphicon glyphicon-remove" style="color:#e24"></span>
+        {% endif %}
+      &nbsp;&nbsp;
+      Search:
+        {% if state.qamatch %}
+          <span class="glyphicon glyphicon-ok" style="color:#2a4"></span>
+        {% else %}
+          <span class="glyphicon glyphicon-remove" style="color:#e24"></span>
+        {% endif %}
+      &nbsp;&nbsp;
+    </h4>
+    </div>
+    <!-- Result File Loader START -->
+    <div class="row">
+      <div class="filebox">
+        <form action="loadres" method="post" enctype="multipart/form-data">
+        <div class="form-group load-form">
+          <h3 class="help-block">RESULT FILE: {{ state.res_fn }}</h3>
+          <input type="file" class="file-control" name="loadres" id="loadres">
+        </div>
+        <button type="submit" class="btn btn-default btn-sm">Load</button>
+        {% if state.res_loaded %}
+          <a href="unloadres"><div class="btn btn-default btn-sm">Unload</div></a>
+        {% endif %}
+        </form>
+      </div>
+    </div>
+    <!-- Result File Loader END -->
+    <!-- Question File Loader START -->
+    <div class="row">
+      <div class="filebox">
+        <form action="loadque" method="post" enctype="multipart/form-data">
+        <div class="form-group load-form">
+          <h3 class="help-block">QUESTION FILE: {{ state.que_fn }}</h3>
+          <input type="file" class="file-control" name="loadque" id="loadres">
+        </div>
+        <button type="submit" class="btn btn-default btn-sm">Load</button>
+        {% if state.que_loaded %}
+          <a href="unloadque"><div class="btn btn-default btn-sm">Unload</div></a>
+        {% endif %}
+        </form>
+      </div>
+    </div>
+    <!-- Question File Loader END -->
+    <!-- Annotation File Loader START -->
+    <div class="row">
+      <div class="filebox">
+        <form action="loadann" method="post" enctype="multipart/form-data">
+        <div class="form-group load-form">
+          <h3 class="help-block">ANNOTATION FILE: {{ state.ann_fn }}</h3>
+          <input type="file" class="file-control" name="loadann" id="loadann">
+        </div>
+        <button type="submit" class="btn btn-default btn-sm">Load</button>
+        {% if state.ann_loaded %}
+          <a href="unloadann"><div class="btn btn-default btn-sm">Unload</div></a>
+        {% endif %}
+        </form>
+      </div>
+    </div>
+    <!-- Annotation File Loader END -->
+  </div>
+  {% if state.evaluated %}
+  <div ng-init="evaluated=true">
+  {% else %}
+  <div ng-init="evaluated=false">
+  {% endif %}
+
+  <uib-tabset>
+    <uib-tab heading="Analysis" active="active.analyze" ng-init="analyze()" ng-click="analyze();set_analyze_active()">
+      <form action="addscore" method="post" enctype="multipart/form-data">
+      <div class="form-group load-form">
+        <h4 class="help-block">Add evaluated score files</h4>
+        <input type="file" class="file-control" name="addscore" id="addscore">
+      </div>
+      <button type="submit" class="btn btn-info btn-sm">Add</button>
+      {% if state.scores_fn|length %}
+        <a href="removescore"><div class="btn btn-warning btn-sm">Remove</div></a>
+      {% endif %}
+      {% if state.scores_fn|length > 1%}
+        <a href="comparision/30/15" target="_blank"><div class="btn btn-primary btn-sm">Comparison</div></a>
+        <a href="overallcompare/15/20" target="_blank"><div class="btn btn-primary btn-sm">Overall</div></a>
+        <a href="cumulativeplot/1/20" target="_blank"><div class="btn btn-primary btn-sm">Cumulative</div></a>
+        <a href="differenceplot/1/20" target="_blank"><div class="btn btn-primary btn-sm">Difference</div></a>
+        <a href="questiontypeplot" target="_blank"><div class="btn btn-primary btn-sm">Question type</div></a>
+      {% endif %}
+      </form>
+      </br>
+      {% if state.score_loadstate != "" %}
+        <div class="alert alert-danger" role="alert">
+          <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+          <span class="sr-only">Error:</span>
+          {{state.score_loadstate }}
+        </div>
+      {% endif %}
+      <ul class="list-group">
+        <li class="list-group-item" ng-repeat="scorefn in scores_fn track by $index">
+          {% raw %}
+          <span class="badge">{{$index}}</span>
+          {{scorefn}}
+          {% endraw %}
+        </li>
+      </ul>
+      <div>
+        <ul class="pager" ng-show="scorelists.length">
+          <li class="previous"><a class="pagerlink" ng-click="analyzeprev()">Previous</a></li>
+          <li class="next"><a class="pagerlink" ng-click="analyzenext()">Next</a></li>
+        </ul>
+      </div>
+      <table class="table" ng-show="scorelists.length">
+        <tr ng-repeat="scores in scorelists">
+          <td> 
+            {% raw %}
+            {{scores.name}}
+            {% endraw %}
+          </td>
+          <td ng-repeat="cols in scores.scores track by $index">
+            {% raw %}
+            {{cols}}
+            {% endraw %}
+          </td>
+        </tr>
+      </table>
+      <div>
+        <ul class="pager" ng-show="scorelists.length">
+          <li class="previous"><a class="pagerlink" ng-click="analyzeprev()">Previous</a></li>
+          <li class="next"><a class="pagerlink" ng-click="analyzenext()">Next</a></li>
+        </ul>
+      </div>
+    </uib-tab>
+    {% if state.visable %}
+    <uib-tab heading="Visualization" active="active.vis" ng-init="visualize();setadddir('{{state.adddir}}')" ng-click="visualize();set_vis_active()">
+      <div>
+        </br>
+        <button type="button" class="btn btn-success" ng-click="cacheadditional()">
+          Show Other Results
+        </button>
+        <button type="button" class="btn btn-info" ng-click="toggleaspectratio()">
+          Toggle Aspect Ratio
+        </button>
+        <button type="button" class="btn btn-info" ng-click="toggleinterpolation()" ng-if="addshow && adddir.length">
+          Toggle Interpolation
+        </button>
+      </div>
+      <form class="form-inline" ng-show="addshow" ng-submit="setadditional(params)">
+        <h4 ng-hide="adddir.length">Type path for additional images</h4>
+        {% raw %}
+        <h4 ng-show="adddir.length">Current path: {{adddir}}</h4>
+        {% endraw %}
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">$</div>
+            <input type="text" class="form-control pathbox" ng-model="params.additionaldir">
+          </div>
+        </div>
+        <button class="btn btn-default">Set</button>
+      </form>
+      <div>
+        <ul class="pager">
+          <li class="previous"><a class="pagerlink" ng-click="visprevdata()">Previous</a></li>
+          <li class="next"><a class="pagerlink" ng-click="visnextdata()">Next</a></li>
+        </ul>
+      </div>
+      <table class="vistable table " ng-show="visres.length">
+      <tr>
+        <td class="td-label" align="center">Image</td>
+        <td class="td-label" align="center" ng-if="addshow && adddir.length">Addtional</td>
+        <td class="td-label" align="center">Question</td>
+        <td class="td-label" align="center">Prediction</td>
+        {% if state.evaluable %}
+        <td class="td-label" align="center">multiple choice answer</td>
+        <td class="td-label" align="center">question_type</td>
+        <td class="td-label" align="center">answer_type</td>
+        {% endif %}
+        <td class="td-label" align="center">question id</td>
+        {% if state.evaluable %}
+        <td class="td-label" align="center">answers</td>
+        {% endif %}
+      </tr>
+      <tr ng-repeat="entry in visres" class="tr-content">
+        {% raw %}
+        <td align="center">
+          <img src={{entry.imgpath}} class="{{imgclass.vis}}">
+        </td>
+        <td align="center" ng-if="addshow && adddir.length">
+          <img src="static/addimgs/{{entry.question_id}}.png" class="{{imgclass.add}} {{interpolation}}">
+        </td>
+        <td class="td-content" align="center">{{entry.question}}</td>
+        <td class="td-content" align="center">{{entry.prediction}}</td>
+        {% endraw %}
+        {% if state.evaluable %}
+          {% raw %}
+        <td class="td-content" align="center">{{entry.multiple_choice_answer}}</td>
+        <td class="td-content" align="center">{{entry.question_type}}</td>
+        <td class="td-content" align="center">{{entry.answer_type}}</td>
+          {% endraw %}
+        {% endif %}
+        {% raw %}
+        <td class="td-content" align="center">{{entry.question_id}}</td>
+        {% endraw %}
+        {% if state.evaluable %}
+          {% raw %}
+        <td class="td-content" align="center">
+          <ul class="ul-ans">
+            <li class="li-ans" ng-repeat="answer in entry.answers">
+              {{answer.answer}}
+            </li>
+          </ul>
+        </td>
+          {% endraw %}
+        {% endif %}
+      </tr>
+      </table>
+      <div>
+        <ul class="pager">
+          <li class="previous"><a class="pagerlink" ng-click="visprevdata()">Previous</a></li>
+          <li class="next"><a class="pagerlink" ng-click="visnextdata()">Next</a></li>
+        </ul>
+      </div>
+    </uib-tab>
+    {% endif %}
+    {% if state.evaluable %}
+    <uib-tab heading="Evaluation" active="active.eval" ng-click="evaluate();set_eval_active()">
+      {% if state.evaluable %}
+      <div ng-show="evaluated">
+        <div class="row inner-row">
+          <a href='downloadscore' class="download-link" download>download accuracy file</a>
+          <br>
+          <a href='downloadevalres' class="download-link" download>download evaluated result file</a>
+        </div>
+        <div class="row inner-row" ng-repeat="(k,v) in accuracy">
+        {% raw %}
+          <h3>{{k}}</h3>
+          <div class="col-md-3" ng-if="k == 'overall'">
+            <b>overall:</b> {{v}}
+          </div>
+          <div class="col-md-3" ng-repeat="(kk, vv) in v">
+            <b>{{kk}}:</b> {{vv}}
+          </div>
+        {% endraw %}
+        </div>
+      </div>
+      <div ng-show="wait">
+        <h3>Evaluation is on-going..</h3>
+        <div ng-show="isprocessing">
+           {% raw %}
+           <h3>{{progress_text}}</h3>
+           {% endraw %}
+        </div>
+      </div>
+    {% endif %}
+    </uib-tab>
+    {% endif %}
+    {% if state.visable %}
+    <uib-tab heading="Browse Question" active="active.ques" ng-init="getquestions()" ng-click="getquestions();set_ques_active()">
+      <div>
+        <ul class="pager">
+          <li class="previous"><a class="pagerlink" ng-click="getprevquestions()">Previous</a></li>
+          <li class="next"><a class="pagerlink" ng-click="getnextquestions()">Next</a></li>
+        </ul>
+      </div>
+      <table class="table occurence">
+        <tr>
+          <td>question</td>
+          <td>occurence</td>
+          <td ng-if="evaluated">score</td>
+        </tr>
+        <tr ng-repeat="etr in quenums">
+          {% raw %}
+          <td><a class="pagerlink" ng-click="visquestion($index)">{{etr.question}}</a></td>
+          <td><a class="pagerlink" ng-click="visquestion($index)">{{etr.occurrence}}</a></td>
+          <td ng-if="evaluated"><a class="pagerlink" ng-click="visquestion($index)">{{etr.score}}</a></td>
+          {% endraw %}
+        </tr>
+      </table>
+      <div>
+        <ul class="pager">
+          <li class="previous"><a class="pagerlink" ng-click="getprevquestions()">Previous</a></li>
+          <li class="next"><a class="pagerlink" ng-click="getnextquestions()">Next</a></li>
+        </ul>
+      </div>
+    </uib-tab>
+    {% endif %}
+
+    {% if state.qamatch %}
+    <uib-tab heading="Search Questions" active="active.questat" ng-click="set_questat_active()">
+      </br>
+      <ul class="list-group">
+        <li class="list-group-item" ng-repeat="scorefn in scores_fn track by $index">
+          {% raw %}
+          <span class="badge">{{$index}}</span>
+          {{scorefn}}
+          {% endraw %}
+        </li>
+      </ul>
+      <form class="form-inline" ng-submit="searchquestion(params)" ng-init="params.searchq=queryquestion;searchquestion(params)">
+        <h4>Search any question</h4>
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">&nbsp;</div>
+            <input type="text" class="form-control" ng-change="searchpreview(params)" ng-model="params.searchq">
+          </div>
+        </div>
+        <button class="btn btn-default">Search</button>
+        {% raw %}
+        <div class="list-group" ng-if="queryquestion.length">
+          <span class="list-group-item"><b>Query Question:</b> {{queryquestion}}</span>
+        </div>
+        {% endraw %}
+      </form>
+      {% raw %}
+       <ul class="list-group" ng-if="qlist.length">
+        <li class="list-group-item" ng-repeat="querycandidate in qlist track by $index">
+          <span class="badge">{{$index}}</span>
+          {{querycandidate}}
+        </li>
+      </ul>     
+      <div class="list-group" ng-if="searchedlist.length">
+        <div class="list-group-item" ng-repeat="searchetr in searchedlist track by $index">
+          <h4><b>Question:</b> <a class="pagerlink" ng-click="showquestion(searchetr.question)">{{searchetr.question}}</a></h4>
+          <b>Occurrence:</b> {{searchetr.occurrence}} &nbsp;&nbsp;
+          <b>Average Number of Answers (agreement):</b> 
+          {{searchetr.avgnumans1 | number:2}} (1)&nbsp;&nbsp;
+          {{searchetr.avgnumans2 | number:2}} (2)&nbsp;&nbsp;
+          {{searchetr.avgnumans3 | number:2}} (3)&nbsp;&nbsp;
+          <b>Average Top Answer Ratio:</b> 
+          {{searchetr.avgtopratio | number:2}}&nbsp;&nbsp;
+          </br>
+          <b>Top Answers:</b> 
+          <span ng-repeat="ans in searchetr.topans track by $index">{{ans[0]}} ({{ans[1]}}) &nbsp;</span>
+          </br>
+          <b>Scores:</b>
+          <span ng-repeat="qscore in searchetr.qscores track by $index">[{{$index}}: {{qscore}}] &nbsp;</span>
+        </div>
+      </div>
+      {% endraw %}
+    </uib-tab>
+    {% endif %}
+    <uib-tab heading="Oracle Merge" active="active.oracle" ng-init="oracle()" ng-click="oracle();set_oracle_active()">
+      <form action="addevalres" method="post" enctype="multipart/form-data">
+      <div class="form-group load-form">
+        <h4 class="help-block">Add evaluated result files</h4>
+        <input type="file" class="file-control" name="addevalres" id="addevalres">
+      </div>
+      <button type="submit" class="btn btn-info btn-sm">Add</button>
+      {% if state.evalres_fn|length %}
+        <a href="resetevalres"><div class="btn btn-warning btn-sm">Reset</div></a>
+      {% endif %}
+      </form>
+      {% if state.evalres_loadstate != "" %}
+        <div class="alert alert-danger" role="alert">
+          <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+          <span class="sr-only">Error:</span>
+          {{state.evalres_loadstate }}
+        </div>
+      {% endif %}
+      <ul class="list-group">
+        <li class="list-group-item" ng-repeat="evalresfn in evalres_fn track by $index">
+          {% raw %}
+          <span class="badge">{{$index}}</span>
+          {{evalresfn}}
+          {% endraw %}
+        </li>
+      </ul>
+      {% if state.evalres_fn|length %}
+        <div class="row inner-row">
+          <a href='downloadoracle' class="download-link" download>download merged oracle file</a>
+        </div>
+      {% endif %}
+    </uib-tab>
+
+  </uib-tabset>
+
+  </div>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+ 
+{% if False %}
+  {% raw %}
+    <div class="vis-frame">
+       {{ vispage }}
+    </div>
+  {% endraw %}
+
+  </br>
+  </br>
+  </br>
+  </br>
+  {% if state.res_fn == 'none' %}
+  <h1> Upload Result File </h1>
+  {% elif state.que_fn == 'none' %}
+  <h1> Upload Question File </h1>
+  {% elif state.ann_fn == 'none' %}
+  <h1> Upload Annotation File </h1>
+  {% else %}
+    <!-- button array for visualization options -->
+    {% raw %}
+    <button class="btn btn-primary">
+      Results
+    </button>
+    <button class="btn btn-success">Annotaions</button>
+    <button class="btn btn-warning">Questions</button>
+
+    {% endraw %}
+    <h1>----visualization----</h1>
+  <div>
+     <h1>RESULT FILE: {{ state.res_fn }}</h1>
+     <h1>ANNOTATION FILE: {{ state.ann_fn }}</h1>
+  </div>
+
+  <form class="navbar-form navbar-left" action="postanno" method="post" enctype="multipart/form-data">
+    <div class="input-group">
+      <input type="file" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-default">Submit</button>
+  </form>
+
+<!-- examples for function implementation -->
+<div ng-controller="exampleCtrl">
+  {% raw %}
+  <!-- server communication -->
+  <button ng-click="getValue()">getValue</button>
+  {{ value }}
+  <!-- click example -->
+  <button ng-click="init()">Init</button>
+  <button ng-click="count = count + 1">Click me</button>
+  <p>{{ count }} </p>
+  <p>Name : <input type="text" ng-model="name"></p>
+  <h1>Hello {{name}}</h1>
+  <!-- file upload -->
+  <form action="postanno" method="post" enctype="multipart/form-data">
+    Select image to upload:
+    <input type="file" name="fileToUpload" id="fileToUpload">
+    <input type="submit" value="Upload Image" name="submit">
+  </form>
+  {% endraw %}
+</div>
+
+  {% endif %}
+{% endif %}
+
+</div>
+</body>
+<script src="static/js/angular.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-cookies.js"></script>
+<script src="static/js/ui-bootstrap-tpls-1.1.2.min.js"></script>
+<script src="static/js/controller.js"></script>
+</html> 

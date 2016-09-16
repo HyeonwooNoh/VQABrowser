@@ -1,0 +1,16 @@
+<h1>Overall</h1>
+  <ul>
+    <li>{{ accuracy.overall }}</li>
+  </ul>
+<h1>perAnswerType</h1>
+  <ul>
+  {% for k, v in accuracy.perAnswerType.iteritems() %}
+    <li>{{k}}: {{v}}</li>
+  {% endfor %}
+  </ul>
+<h1>perQuestionType</h1>
+  <ul>
+  {% for k, v in accuracy.perQuestionType.iteritems() %}
+    <li>{{k}}: {{v}}</li>
+  {% endfor %}
+  </ul>

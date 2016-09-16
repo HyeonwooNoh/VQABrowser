@@ -1,0 +1,24 @@
+
+{% if is_item == False %}
+There is no Item
+
+{% else %}
+
+  {{ results }}
+  <table>
+  {% for entry in results %}
+  <tr>
+    <td><img src={{entry.imgpath}}></td>
+    <td>question: {{entry.question}}</td>
+    <td>prediction: {{entry.prediction}}</td>
+    <td>Others:
+prediction: {{entry.prediction}}, question_id: {{entry.question_id}}
+        question: {{entry.question}}, image_id: {{entry.image_id}},
+        imgpath: {{entry.imgpath}}
+    </td>
+  </tr>
+  {% endfor %}
+  </table>
+
+{% endif %}
+
