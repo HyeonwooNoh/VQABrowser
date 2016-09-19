@@ -42,5 +42,15 @@ python browser.py --host [host] --port [port]
 Open ```http://[host]:[port]``` with your web browser to interface the VQA Browser.
 
 
+## Manual
+* [Basic Usage](/doc/basic_usage.md)
+* [Analysis](/doc/analysis.md)
+* [Visualization](/doc/visualization.md)
+* [Evaluation](/doc/evaluation.md)
+* [Browse Question](/doc/browse_question.md)
+* [Search Questions](/doc/search_questions.md)
+* [Oracle Merge](/doc/oracle_merge.md)
+
+
 ## Screenshot
 ![Image of overview](./assets/overview.png)
