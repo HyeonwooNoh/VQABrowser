@@ -1,7 +1,7 @@
 ## Basic Usage
 
 You can see the following interface when you open the VQA Broswer.
-![default image](./assets/default.png)
+![default image](../assets/default.png)
 
 ### Loading Files
 The first thing you need to do is loading result, question and annotation files.
@@ -18,7 +18,7 @@ Annotation file is used for the quantitative evaluation and for comparison with 
 ### Choose Tab
 After loading files, you can click one of the visible tabs to use the required function.
 
-![visible tabs](./assets/visible_tabs.png)
+![visible tabs](../assets/visible_tabs.png)
 
 * **Analysis**
   * Comparision of different models's scores
